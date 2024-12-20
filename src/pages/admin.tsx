@@ -49,10 +49,10 @@ const Admin: NextPage<AdminProps> = ({ userPermission }) => {
         <Spinner />
       ) : (
         <div className="relative flex h-[91.5%] w-full flex-row  overflow-hidden">
-          <div className="z-0 h-full min-w-[150px] max-w-[250px] flex-[1] border-r-4 border-busy-red   bg-stone-100">
+          <div className="z-0 h-full min-w-[175px] max-w-[250px] flex-[1] border-r-4 border-busy-red   bg-stone-100">
             <AdminSidebar option={option} setOption={setOption} />
           </div>
-          <div className="h-full flex-[3] overflow-y-auto">
+          <div className="h-full w-full flex-[3] ">
             {option === "management" ? (
               <UserManagement permission={userPermission} />
             ) : (

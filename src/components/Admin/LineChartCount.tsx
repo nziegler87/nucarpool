@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -14,8 +14,6 @@ import {
   ChartOptions,
 } from "chart.js";
 import "chartjs-adapter-date-fns";
-import { format, startOfWeek, differenceInWeeks, addWeeks } from "date-fns";
-import { Slider, ConfigProvider } from "antd";
 
 ChartJS.register(
   CategoryScale,
@@ -28,138 +26,25 @@ ChartJS.register(
   Legend
 );
 
-import { TempUser, TempGroup, TempRequest } from "../../utils/types";
-import {
-  countCumulativeItemsPerWeek,
-  filterItemsByDate,
-} from "../../utils/adminDataUtils";
-import _ from "lodash";
-
 interface LineChartCountProps {
-  users: TempUser[];
-  groups: TempGroup[];
-  requests: TempRequest[];
+  activeUserCount: (number | null)[];
+  inactiveUserCount: (number | null)[];
+  groupCounts: (number | null)[];
+  requestCount: (number | null)[];
+  driverRequestCount: (number | null)[];
+  riderRequestCount: (number | null)[];
+  weekLabels: Date[];
 }
 
-function LineChartCount({ users, groups, requests }: LineChartCountProps) {
-  const [sliderRange, setSliderRange] = useState<number[]>([0, 0]);
-  const [minDate, setMinDate] = useState<number>(0);
-  const [maxDate, setMaxDate] = useState<number>(0);
-  const activeUsers = users.filter(
-    (user: TempUser) => user.status === "ACTIVE"
-  );
-  const riderRequests = requests.filter(
-    (request) => request.fromUser.role === "RIDER"
-  );
-
-  const driverRequests = requests.filter(
-    (request) => request.fromUser.role === "DRIVER"
-  );
-  const inactiveUsers = _.differenceBy(users, activeUsers);
-  useEffect(() => {
-    if (users && groups) {
-      const allTimestamps = [
-        ...users.map((user) => user.dateCreated.getTime()),
-        ...groups.map((group) => group.dateCreated.getTime()),
-        ...requests.map((request) => request.dateCreated.getTime()),
-      ];
-
-      if (allTimestamps.length > 0) {
-        const minTimestamp = Math.min(...allTimestamps);
-        const maxTimestamp = Math.max(...allTimestamps);
-
-        setMinDate(minTimestamp);
-        setMaxDate(maxTimestamp);
-        setSliderRange([
-          startOfWeek(minTimestamp).getTime(),
-          startOfWeek(maxTimestamp).getTime(),
-        ]);
-      }
-    }
-  }, [users, groups, requests]);
-
-  const onSliderChange = (value: number[]) => {
-    setSliderRange(value);
-  };
-
-  // Filter based on slider range
-  const filteredActiveUsers = filterItemsByDate(
-    activeUsers,
-    sliderRange[0],
-    sliderRange[1]
-  );
-  const filteredInactiveUsers = filterItemsByDate(
-    inactiveUsers,
-    sliderRange[0],
-    sliderRange[1]
-  );
-  const filteredGroups = filterItemsByDate(
-    groups,
-    sliderRange[0],
-    sliderRange[1]
-  );
-  const filteredRequests = filterItemsByDate(
-    requests,
-    sliderRange[0],
-    sliderRange[1]
-  );
-  const filteredDriverRequests = filterItemsByDate(
-    driverRequests,
-    sliderRange[0],
-    sliderRange[1]
-  );
-  const filteredRiderRequests = filterItemsByDate(
-    riderRequests,
-    sliderRange[0],
-    sliderRange[1]
-  );
-
-  // Generate week labels
-  const allDates = [
-    ...users.map((user) => user.dateCreated),
-    ...filteredGroups.map((group) => group.dateCreated),
-    ...filteredRequests.map((request) => request.dateCreated),
-  ];
-
-  let weekLabels: Date[] = [];
-  if (allDates.length > 0) {
-    const minWeekDate = startOfWeek(
-      new Date(Math.min(...allDates.map((date) => date.getTime())))
-    );
-    const maxWeekDate = startOfWeek(
-      new Date(Math.max(...allDates.map((date) => date.getTime())))
-    );
-
-    const weeksDifference = differenceInWeeks(maxWeekDate, minWeekDate) + 1;
-
-    for (let i = 0; i < weeksDifference; i++) {
-      const weekStart = addWeeks(minWeekDate, i);
-      weekLabels.push(weekStart);
-    }
-  }
-
-  const activeUserCount = countCumulativeItemsPerWeek(
-    filteredActiveUsers,
-    weekLabels
-  );
-  const inactiveUserCount = countCumulativeItemsPerWeek(
-    filteredInactiveUsers,
-    weekLabels
-  );
-  const driverRequestCount = countCumulativeItemsPerWeek(
-    filteredDriverRequests,
-    weekLabels
-  );
-  const riderRequestCount = countCumulativeItemsPerWeek(
-    filteredRiderRequests,
-    weekLabels
-  );
-  const requestCount = countCumulativeItemsPerWeek(
-    filteredRequests,
-    weekLabels
-  );
-  const groupCounts = countCumulativeItemsPerWeek(filteredGroups, weekLabels);
-
+function LineChartCount({
+  activeUserCount,
+  inactiveUserCount,
+  groupCounts,
+  requestCount,
+  driverRequestCount,
+  riderRequestCount,
+  weekLabels,
+}: LineChartCountProps) {
   const lineData: ChartData<"line"> = {
     labels: weekLabels,
     datasets: [
@@ -237,6 +122,8 @@ function LineChartCount({ users, groups, requests }: LineChartCountProps) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
+      // @ts-ignore
+      totalLabelPlugin: false,
       legend: {
         position: "top",
         labels: {
@@ -327,46 +214,15 @@ function LineChartCount({ users, groups, requests }: LineChartCountProps) {
     },
   };
 
-  const formatter = (value: any) => format(new Date(value), "MMM dd, yyyy");
-
   return (
-    <div className="h-full w-full">
-      {allDates.length > 0 ? (
-        <div className="relative h-[500px] w-full">
+    <div className=" w-full">
+      {weekLabels.length > 0 ? (
+        <div className="relative min-h-[600px]  w-full">
           <Line data={lineData} options={lineOptions} />
         </div>
       ) : (
         <div>No data available for the selected date range.</div>
       )}
-      <div className="w-full">
-        <ConfigProvider
-          theme={{
-            token: {
-              fontFamily: "Montserrat",
-              fontSize: 16,
-              colorPrimary: "#C8102E",
-            },
-          }}
-        >
-          <Slider
-            range={{ draggableTrack: true }}
-            min={startOfWeek(minDate).getTime()}
-            max={startOfWeek(maxDate).getTime()}
-            value={sliderRange}
-            tooltip={{ formatter }}
-            onChange={onSliderChange}
-            step={7 * 24 * 60 * 60 * 1000}
-          />
-        </ConfigProvider>
-        <div className="flex justify-between font-montserrat">
-          <span>
-            {format(startOfWeek(new Date(sliderRange[0])), "MMM dd, yyyy")}
-          </span>
-          <span>
-            {format(startOfWeek(new Date(sliderRange[1])), "MMM dd, yyyy")}
-          </span>
-        </div>
-      </div>
     </div>
   );
 }

@@ -21,36 +21,15 @@ ChartJS.register(
   Legend
 );
 
-import { TempUser } from "../../utils/types";
-
 interface BarChartOnboardingProps {
-  users: TempUser[];
+  riderDayCount: number[];
+  driverDayCount: number[];
 }
 
-function BarChartUserCounts({ users }: BarChartOnboardingProps) {
-  const activeUsers = users.filter((user) => user.status === "ACTIVE");
-
-  const drivers = activeUsers.filter((user) => user.role === "DRIVER");
-
-  const riders = activeUsers.filter((user) => user.role === "RIDER");
-  const riderDayCount = [0, 0, 0, 0, 0, 0, 0];
-  const driverDayCount = [0, 0, 0, 0, 0, 0, 0];
-
-  riders.forEach((rider) => {
-    rider.daysWorking.split(",").forEach((day, index) => {
-      if (day === "1") {
-        riderDayCount[index] += 1;
-      }
-    });
-  });
-  drivers.forEach((driver) => {
-    driver.daysWorking.split(",").forEach((day, index) => {
-      if (day === "1") {
-        driverDayCount[index] += 1;
-      }
-    });
-  });
-
+function BarChartDaysFrequency({
+  riderDayCount,
+  driverDayCount,
+}: BarChartOnboardingProps) {
   const labels = ["Su", "M", "Tu", "W", "Th", "F", "S"];
 
   const barData: ChartData<"bar"> = {
@@ -77,6 +56,8 @@ function BarChartUserCounts({ users }: BarChartOnboardingProps) {
       legend: {
         display: true,
       },
+      // @ts-ignore
+      totalLabelPlugin: false,
       title: {
         display: true,
         text: "Days Carpooling Frequency",
@@ -119,16 +100,14 @@ function BarChartUserCounts({ users }: BarChartOnboardingProps) {
   };
 
   return (
-    <div className="relative  w-full ">
-      <div className="  flex h-[500px] flex-col">
-        <Bar data={barData} options={barOptions} />
-        <span className="w-full text-center font-lato text-sm text-gray-400">
-          All bars currently only include active users aside from
-          &quot;Inactive&quot;
-        </span>
-      </div>
+    <div className=" flex h-[500px] w-full  flex-col">
+      <Bar data={barData} options={barOptions} />
+      <span className="w-full text-center font-lato text-sm text-gray-400">
+        All bars currently only include active users aside from
+        &quot;Inactive&quot;
+      </span>
     </div>
   );
 }
 
-export default BarChartUserCounts;
+export default BarChartDaysFrequency;
