@@ -25,19 +25,19 @@ function QuickStats({
   const conversationData = [
     {
       data: totalConversationCount,
-      label: "Total # of Conversations",
+      label: "Total Conversations",
     },
     {
       data: totalWithMsgCount,
-      label: "Total # of Conversations with > 1 messages sent",
+      label: "Total Conversations with > 1 Message",
     },
     {
       data: Math.round(avgConvWithMsg * 10) / 10,
-      label: "Avg # of Msgs when > 1 messages sent",
+      label: "Avg Messages Per Conversation with > 1 Message",
     },
     {
       data: Math.round(avgMsg * 10) / 10,
-      label: "Avg # of Msgs for all Conversations",
+      label: "Avg Messages ",
     },
   ];
   const groupData = [
@@ -55,7 +55,7 @@ function QuickStats({
     },
     {
       data: averageRidersPerGroup,
-      label: "Average # of riders per group",
+      label: "Average Riders Per Group",
     },
   ];
 

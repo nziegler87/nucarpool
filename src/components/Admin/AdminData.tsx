@@ -271,7 +271,8 @@ function AdminData() {
 
   const handleDownloadData = async () => {
     const zip = new JSZip();
-    const date = new Date().toLocaleDateString();
+    const dateRaw = new Date().toLocaleDateString();
+    const date = dateRaw.replace(/\//g, "_");
     zip.file(`line_chart_${date}.csv`, buildLineChartCSV());
     zip.file(`user_counts_${date}.csv`, buildUserCountsCSV());
     zip.file(`days_frequency_${date}.csv`, buildDaysFrequencyCSV());
