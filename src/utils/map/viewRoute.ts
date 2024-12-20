@@ -200,8 +200,9 @@ export function useGetDirections({
           source.setData(lineStringFeature);
         } else {
           let beforeLayerId = "";
-
-          if (map.getLayer("riders")) {
+          if (map.getLayer("layer-with-pulsing-dot")) {
+            beforeLayerId = "layer-with-pulsing-dot";
+          } else if (map.getLayer("riders")) {
             beforeLayerId = "riders";
           } else if (map.getLayer("drivers")) {
             beforeLayerId = "drivers";
