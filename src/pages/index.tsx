@@ -294,7 +294,7 @@ const Home: NextPage<any> = () => {
 
       if (user.role === "RIDER") {
         setPoints([
-          [clickedUser.startPOICoordLng, clickedUser.startPOICoordLat],
+          [clickedUser.startCoordLng, clickedUser.startCoordLat],
           [userStartLng, userStartLat],
           [userCompanyLng, userCompanyLat],
           [clickedUser.companyCoordLng, clickedUser.companyCoordLat],
@@ -302,13 +302,13 @@ const Home: NextPage<any> = () => {
       } else if (isViewerAddressSelected || user.role == "DRIVER") {
         setPoints([
           [userStartLng, userStartLat],
-          [clickedUser.startPOICoordLng, clickedUser.startPOICoordLat],
+          [clickedUser.startCoordLng, clickedUser.startCoordLat],
           [clickedUser.companyCoordLng, clickedUser.companyCoordLat],
           [userCompanyLng, userCompanyLat],
         ]);
       } else {
         setPoints([
-          [clickedUser.startPOICoordLng, clickedUser.startPOICoordLat],
+          [clickedUser.startCoordLng, clickedUser.startCoordLat],
           [clickedUser.companyCoordLng, clickedUser.companyCoordLat],
         ]);
       }
