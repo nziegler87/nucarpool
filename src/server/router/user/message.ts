@@ -1,6 +1,16 @@
 import { TRPCError } from "@trpc/server";
 import { protectedRouter, router } from "../createRouter";
 import { z } from "zod";
+import Pusher from "pusher";
+import { message } from "antd";
+
+const pusher = new Pusher({
+  appId: "1933132",
+  key: "988fdff5dc5909417348",
+  secret: "484df2e314b7f06a5392",
+  cluster: "us2",
+  useTLS: true
+});
 
 export const messageRouter = router({
   getUnreadMessageCount: protectedRouter.query(async ({ ctx }) => {
@@ -98,6 +108,28 @@ export const messageRouter = router({
         where: { requestId: input.requestId },
       });
 
+      // notify the frontend in real time 
+      if (conversation) {
+
+        console.log("Conversation:", conversation);
+        console.log("Conversation ID:", conversation?.id);
+
+        const newMessage = await ctx.prisma.message.create({
+          data: {
+            conversationId: conversation.id,
+            content: input.content,
+            userId: userId,
+          },
+        });
+
+        console.log("backend message", newMessage)
+        
+        pusher.trigger("conversation", "sendMessage", {
+          requestId: input.requestId,
+          newMessage: newMessage,
+        });
+      }
+
       if (!conversation) {
         conversation = await ctx.prisma.conversation.create({
           data: { requestId: input.requestId },
@@ -109,13 +141,13 @@ export const messageRouter = router({
         });
       }
 
-      return ctx.prisma.message.create({
-        data: {
-          conversationId: conversation.id,
-          content: input.content,
-          userId: userId,
-        },
-      });
+      // return ctx.prisma.message.create({
+      //   data: {
+      //     conversationId: conversation.id,
+      //     content: input.content,
+      //     userId: userId,
+      //   },
+      // });
     }),
 
   markMessagesAsRead: protectedRouter
